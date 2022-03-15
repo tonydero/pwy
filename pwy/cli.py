@@ -5,7 +5,7 @@ import os
 import json
 
 from pwy.translation import TRANSLATIONS_JSON
-from pwy.colours import BWHITE, GREEN, RESET, BWHITE
+from pwy.colours import BWHITE, GREEN, YELLOW, BLUE, CYAN, PURPLE, RESET, BWHITE
 from pwy.ascii import clear_sky, few_clouds, overcast_cloud, rain, \
                     thunderstorm, snow, mist, unknown
 from pwy._version import __version__
@@ -16,7 +16,7 @@ def get_key():
 
     home = os.path.expanduser("~")
 
-    if os.name is "posix":
+    if os.name == "posix":
         with open(f"{home}/.pwyrc") as f:
             key = f.readline()
 
@@ -151,13 +151,31 @@ def display_weather_info(info):
         f"\t{ascii[4]}  {GREEN}{time}{RESET}\n"
     )
 
+def display_weather_info_twoline(info):
+    """Display the weather information."""
+
+    ascii = get_ascii(info)
+    units = get_units(info)
+    time = get_localtime(info)
+    dirs = get_wind_direction(info)
+    width = 20
+    prs_width = width-len(str(info['pressure']))
+
+    return(
+        f"{BLUE}{info['description']: <{width}}"
+        f"{GREEN}{info['temp']}{RESET} ({info['feels_like']}) {units[0]}\n"
+        f"{YELLOW}{info['pressure']}{RESET}{'hPa': <{prs_width}}"\
+                f"{CYAN}{info['humidity']}{RESET}{'%': <{width}}"\
+                f"{BWHITE}{dirs} {PURPLE}{info['speed']}{RESET}{units[1]}\n"
+    )
+
 
 def configuration(config):
     """Configure OWM API key and save it in the .pwyrc file."""
 
     home = os.path.expanduser("~")
 
-    if os.name is "posix":
+    if os.name == "posix":
         key_file = open(f"{home}/.pwyrc", "w+")
     else:
         key_file = open(f"{home}\.pwyrc", "w+")
@@ -200,4 +218,4 @@ def main():
             lang = "en"
 
         info = get_weather_data(location, unit, lang)
-        print(display_weather_info(info))
+        print(display_weather_info_twoline(info))
